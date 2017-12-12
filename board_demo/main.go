@@ -1,13 +1,13 @@
 package main
 
 import (
-	"tetris/board"
+	"go-tetris/board"
 
 	"github.com/nsf/termbox-go"
 )
 
 func main() {
-	Board := board.Board{10, 10}
+	Board := board.Board{30, 10, 30, 10}
 	termbox.Init()
 	for i := 0; i < Board.Height; i++ {
 		for j := 0; j < Board.Width; j++ {

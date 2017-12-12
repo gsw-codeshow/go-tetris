@@ -1,7 +1,7 @@
 package main
 
 import (
-	"tetris/block"
+	"go-tetris/block"
 
 	"math/rand"
 	"time"

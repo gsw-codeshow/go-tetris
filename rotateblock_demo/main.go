@@ -1,8 +1,8 @@
 package main
 
 import (
-	_ "fmt"
-	"tetris/block"
+	"fmt"
+	"go-tetris/block"
 	"time"
 
 	"github.com/nsf/termbox-go"
@@ -10,7 +10,10 @@ import (
 
 func main() {
 	bf := block.InitBlockInterface()
-	termbox.Init()
+	termboxErr := termbox.Init()
+	if nil != termboxErr {
+		fmt.Println(termboxErr)
+	}
 	currentShapes := bf.Entry[1]
 	currentX := 10
 	currentY := 10

@@ -1,10 +1,13 @@
 package main
 
 import (
-	"tetris/block"
-	"tetris/board"
+	"go-tetris/block"
+	"go-tetris/board"
 
+	"fmt"
 	"math/rand"
+
+	"time"
 
 	"github.com/nsf/termbox-go"
 )
@@ -24,7 +27,9 @@ type Context struct {
 }
 
 func ListenEvent(event chan termbox.Event) {
-	event <- termbox.PollEvent()
+	for {
+		event <- termbox.PollEvent()
+	}
 	return
 }
 
@@ -45,8 +50,8 @@ func (ct *Context) RandomShapes() int {
 
 func (ct *Context) Draw() {
 	termbox.Clear(termbox.ColorDefault, termbox.ColorDefault)
-	for x := 0; x < ct.Board.Width; x++ {
-		for y := 0; y < ct.Board.Height; y++ {
+	for x := 0; x < ct.Board.Height; x++ {
+		for y := 0; y < ct.Board.Width; y++ {
 			if 0 != ct.Context[x][y] {
 				termbox.SetCell(x, y, rune('#'), termbox.ColorGreen, termbox.ColorDefault)
 			}
@@ -72,31 +77,47 @@ func (ct *Context) InitShapesAndShapes() {
 			maxInitPoint.Y = ct.Block.Abs(blockOffset.Y)
 		}
 	}
-	ct.CurrentBShapesPoint.X = maxInitPoint.X
-	ct.CurrentBShapesPoint.Y = maxInitPoint.Y
+	ct.CurrentBShapesPoint.X += maxInitPoint.X
+	ct.CurrentBShapesPoint.Y += maxInitPoint.Y
+}
+
+func (ct *Context) HasVaild() bool {
+	for _, blockOffset := range ct.CurrentShapes.Body {
+		x := ct.CurrentBShapesPoint.X + blockOffset.X
+		y := ct.CurrentBShapesPoint.Y + blockOffset.Y
+		if x > ct.Board.Width {
+			return false
+		}
+		if y > ct.Board.Height {
+			return false
+		}
+		if 0 != ct.Context[x][y] {
+			return false
+		}
+	}
+	return true
 }
 
 func main() {
-	termbox.Init()
+	termboxErr := termbox.Init()
+	if nil != termboxErr {
+		fmt.Println(termboxErr)
+	}
 	defer termbox.Close()
 	context := new(Context)
 	context.Event = make(chan termbox.Event)
+
 	go ListenEvent(context.Event)
 	context.Block = block.InitBlockInterface()
 	context.Board = board.InitBoard()
 	context.InitContextBoard()
 	context.InitShapesAndShapes()
 	context.Quit = true
-
 	for context.Quit {
-
-		select {
-		case event := <-context.Event:
-			switch event.Key {
-			case termbox.KeyArrowUp:
-			default:
-			}
-		default:
+		context.CurrentBShapesPoint.Y++
+		context.Draw()
+		time.Sleep(time.Second)
+		if !context.HasVaild() {
 		}
 	}
 }
